@@ -1,0 +1,37 @@
+# Use official Node.js LTS image
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y curl wget gnupg ca-certificates python3-pip && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    wget -qO - https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg && \
+    echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
+    apt-get update && \
+    apt-get install -y mongodb-org && \
+    # npm install -g mongo-express && \
+    pip3 install supervisor && \
+    mkdir -p /data/db
+
+# Set working directory
+WORKDIR /usr/src/app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the code
+COPY . .
+
+# Copy supervisor config
+COPY supervisord.conf /etc/supervisord.conf
+
+# Expose ports
+EXPOSE 5001 27017 8081
+
+# Start all services
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
