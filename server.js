@@ -23,8 +23,12 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error(err));
 
 app.get('/', (req, res) => {
-  res.json({ status: 'success', message: 'Blogging API is running.' });
+  res.redirect('/docs');
 });
+
+// app.get('/', (req, res) => {
+//   res.json({ status: 'success', message: 'Blogging API is running.', swaggerSpec: 'For an interactive API documentation, visit /docs' });
+// });
 
 app.get('/health', async (req, res) => {
   const dbState = mongoose.connection.readyState;
