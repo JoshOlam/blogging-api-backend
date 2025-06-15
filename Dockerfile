@@ -8,6 +8,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 
+# Create non-root user and set permissions
+RUN useradd -ms /bin/bash appuser && \
+    chown -R appuser:appuser /usr/src/app
+
 # Copy the rest of the code
 COPY . .
 
